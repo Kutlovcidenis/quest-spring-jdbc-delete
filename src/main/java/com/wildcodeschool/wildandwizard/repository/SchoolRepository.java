@@ -18,7 +18,28 @@ public class SchoolRepository {
     private final static String DB_PASSWORD = "Horcrux4life!";
 
     public void deleteById(Long id) {
-        // TODO: delete a school from the database
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = DriverManager.getConnection(
+                    DB_URL, DB_USER, DB_PASSWORD
+            );
+            statement = connection.prepareStatement(
+                    "DELETE FROM school WHERE id=?"
+            );
+            statement.setLong(1, id);
+
+            if (statement.executeUpdate() != 1) {
+                throw new SQLException("failed to delete data");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            JdbcUtils.closeResultSet(resultSet);
+            JdbcUtils.closeStatement(statement);
+            JdbcUtils.closeConnection(connection);
+        }
     }
 
     public List<School> findAll() {
@@ -35,16 +56,16 @@ public class SchoolRepository {
             );
             resultSet = statement.executeQuery();
 
-            List<School> schools = new ArrayList<>();
+            List<School> school = new ArrayList<>();
 
             while (resultSet.next()) {
                 Long id = resultSet.getLong("id");
-                String name = resultSet.getString("name");
-                Long capacity = resultSet.getLong("capacity");
-                String country = resultSet.getString("country");
-                schools.add(new School(id, name, capacity, country));
+                String name = resultSet.getString("Name");
+                Long capacity = resultSet.getLong("Capacity");
+                String country = resultSet.getString("Country");
+                school.add(new School(id, name, capacity, country));
             }
-            return schools;
+            return school;
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
